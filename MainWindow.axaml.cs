@@ -148,10 +148,12 @@ public partial class MainWindow : Window
             int number = _random.Next(1, 21);
             int square = number * number;
             
+            // Select language texts
+            ILanguageTexts texts = IsEnglish ? new EnglishTexts() : new DutchTexts();
+            
             // Phase 1: Ask the question
             SetVoiceForLanguage();
-            string questionTemplate = IsEnglish ? Texts.English.Question : Texts.Dutch.Question;
-            string question = string.Format(questionTemplate, square);
+            string question = string.Format(texts.Question, square);
             await SpeakTextAsync(question, cancellationToken);
             
             if (cancellationToken.IsCancellationRequested) return;
@@ -162,8 +164,7 @@ public partial class MainWindow : Window
             if (cancellationToken.IsCancellationRequested) return;
             
             // Phase 3: Tell how much time they have
-            string timeTemplate = IsEnglish ? Texts.English.TimeAnnouncement : Texts.Dutch.TimeAnnouncement;
-            string timeAnnouncement = string.Format(timeTemplate, secondsToAnswer);
+            string timeAnnouncement = string.Format(texts.TimeAnnouncement, secondsToAnswer);
             await SpeakTextAsync(timeAnnouncement, cancellationToken);
             
             if (cancellationToken.IsCancellationRequested) return;
@@ -174,8 +175,7 @@ public partial class MainWindow : Window
             if (cancellationToken.IsCancellationRequested) return;
             
             // Phase 5: Give the answer
-            string answerTemplate = IsEnglish ? Texts.English.Answer : Texts.Dutch.Answer;
-            string answer = string.Format(answerTemplate, square, number);
+            string answer = string.Format(texts.Answer, square, number);
             await SpeakTextAsync(answer, cancellationToken);
         }
         catch (TaskCanceledException)

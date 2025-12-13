@@ -2,61 +2,121 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="MathTrainer.MainWindow"
         Title="Square Root Trainer"
-        Width="450"
-        Height="300"
-        WindowStartupLocation="CenterScreen">
-    
-    <StackPanel Margin="20" Spacing="15">
-        <TextBlock Text="Square Root Trainer" 
-                   FontSize="24" 
-                   FontWeight="Bold"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,20"/>
+        Width="500"
+        Height="520"
+        WindowStartupLocation="CenterScreen"
+        Background="#F3F4F6"
+        CanResize="False">
+    <Window.Styles>
+        <!-- Label Style -->
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <!-- Input Styles -->
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
         
-        <Grid ColumnDefinitions="*, 100" RowDefinitions="Auto,Auto,Auto,Auto" 
-              HorizontalAlignment="Center"
-              VerticalAlignment="Center">
-            
-            <TextBlock Grid.Row="0" Grid.Column="0" 
-                       Text="Language:" 
-                       VerticalAlignment="Center"
-                       Margin="0,0,10,0"/>
-            <ComboBox Grid.Row="0" Grid.Column="1" 
-                      Name="LanguageComboBox"
-                      SelectedIndex="1"
-                      HorizontalAlignment="Stretch">
-                <ComboBoxItem Content="English"/>
-                <ComboBoxItem Content="Dutch"/>
-            </ComboBox>
-            
-            <TextBlock Grid.Row="1" Grid.Column="0" 
-                       Text="Time to answer (seconds):" 
-                       VerticalAlignment="Center"
-                       Margin="0,10,10,0"/>
-            <TextBox Grid.Row="1" Grid.Column="1" 
-                     Name="AnswerTimeTextBox"
-                     Text="10"
-                     Margin="0,10,0,0"
-                     HorizontalAlignment="Stretch"/>
-            
-            <TextBlock Grid.Row="2" Grid.Column="0" 
-                       Text="Time between questions (seconds):" 
-                       VerticalAlignment="Center"
-                       Margin="0,10,10,0"/>
-            <TextBox Grid.Row="2" Grid.Column="1" 
-                     Name="IntervalTextBox"
-                     Text="5"
-                     Margin="0,10,0,0"
-                     HorizontalAlignment="Stretch"/>
-        </Grid>
+        <Style Selector="ComboBox">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Primary Button Style -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#4F46E5"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
         
-        <Button Name="StartStopButton"
-                Content="Start"
-                FontSize="20"
-                HorizontalAlignment="Center"
-                Width="200"
-                Height="60"
-                Margin="0,20,0,0"
-                Click="StartStopButton_Click" />
-    </StackPanel>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#4338CA"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <Style Selector="Button.primary:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#3730A3"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </Window.Styles>
+
+    <!-- Main Container -->
+    <Border Padding="40">
+        <!-- Card -->
+        <Border Background="White" 
+                CornerRadius="16" 
+                BoxShadow="0 4 15 0 #1A000000">
+            
+            <StackPanel Margin="30" Spacing="30" VerticalAlignment="Center">
+                
+                <!-- Header Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Square Root Trainer" 
+                               FontSize="28" 
+                               FontWeight="Bold" 
+                               Foreground="#111827"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Sharpen your mental math skills" 
+                               FontSize="14" 
+                               Foreground="#6B7280"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Settings Form -->
+                <Grid ColumnDefinitions="Auto, *" 
+                      RowDefinitions="Auto,Auto,Auto">
+                    
+                    <!-- Language Selection -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Classes="label" Text="Language" Margin="0,0,20,20"/>
+                    <ComboBox Grid.Row="0" Grid.Column="1" 
+                              Name="LanguageComboBox"
+                              SelectedIndex="1"
+                              HorizontalAlignment="Stretch"
+                              Margin="0,0,0,20">
+                        <ComboBoxItem Content="English"/>
+                        <ComboBoxItem Content="Dutch"/>
+                    </ComboBox>
+                    
+                    <!-- Answer Time Input -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Classes="label" Text="Time to answer (s)" Margin="0,0,20,20"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" 
+                             Name="AnswerTimeTextBox"
+                             Text="10"
+                             Margin="0,0,0,20"/>
+                    
+                    <!-- Interval Input -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="Interval time (s)" Margin="0,0,20,0"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" 
+                             Name="IntervalTextBox"
+                             Text="5"/>
+                </Grid>
+                
+                <!-- Action Button -->
+                <Button Name="StartStopButton"
+                        Classes="primary"
+                        Content="Start Training"
+                        Click="StartStopButton_Click"
+                        HorizontalAlignment="Stretch"
+                        Height="50"
+                        Margin="0,10,0,0"/>
+            </StackPanel>
+        </Border>
+    </Border>
 </Window>
