@@ -4,6 +4,7 @@ using Avalonia.Threading;
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -15,6 +16,13 @@ namespace MathTrainer;
 
 public partial class MainWindow : Window
 {
+    // Windows API to prevent system sleep
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern uint SetThreadExecutionState(uint esFlags);
+
+    private const uint ES_CONTINUOUS = 0x80000000;
+    private const uint ES_SYSTEM_REQUIRED = 0x00000001;
+    private const uint ES_AWAYMODE_REQUIRED = 0x00000040;
     // Change these constants to adjust timing
     private const int DEFAULT_INTERVAL_SECONDS = 5; // Default time between question cycles
     private const int DEFAULT_SECONDS_TO_ANSWER = 3; // Default time given to answer the question
@@ -137,6 +145,9 @@ public partial class MainWindow : Window
         AnswerTimeTextBox.IsEnabled = false;
         IntervalTextBox.IsEnabled = false;
         
+        // Prevent system from sleeping while training
+        SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
+        
         _cancellationTokenSource = new CancellationTokenSource();
         
         // Start the training loop
@@ -148,6 +159,9 @@ public partial class MainWindow : Window
         _isRunning = false;
         _cancellationTokenSource?.Cancel();
         StartStopButton.Content = _currentTexts.StartButton;
+        
+        // Restore normal power management
+        SetThreadExecutionState(ES_CONTINUOUS);
         
         // Clear the countdown indicator
         CountdownTextBlock.Text = "";
@@ -319,6 +333,9 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _cancellationTokenSource?.Cancel();
+        
+        // Ensure power management is restored when window closes
+        SetThreadExecutionState(ES_CONTINUOUS);
         _synthesizer.Dispose();
         _mediaPlayer.Dispose();
         base.OnClosed(e);
