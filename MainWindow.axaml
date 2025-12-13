@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MathTrainer.MainWindow"
+        Title="Square Root Trainer"
+        Width="400"
+        Height="200"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid>
+        <Button Name="StartStopButton"
+                Content="Start"
+                FontSize="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="200"
+                Height="80"
+                Click="StartStopButton_Click" />
+    </Grid>
+</Window>
