@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SquareRootTrainer", "SquareRootTrainer.csproj", "{C417F8DB-9557-3F5E-9536-6FB10D70501F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SquareRootTrainer", "SquareRootTrainer\SquareRootTrainer.csproj", "{C417F8DB-9557-3F5E-9536-6FB10D70501F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioGenerator", "AudioGenerator\AudioGenerator.csproj", "{A7B2F8E9-1234-5678-9ABC-DEF012345678}"
 EndProject
