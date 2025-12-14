@@ -39,6 +39,8 @@ public partial class MainWindow : Window
     private const int DEFAULT_INTERVAL_SECONDS = 60; // Default time between question cycles
     private const int DEFAULT_SECONDS_TO_ANSWER = 3; // Default time given to answer the question
     private const int BRIEF_PAUSE_MS = 1000; // Brief pause after asking question (in milliseconds)
+    private const int DEFAULT_LOWEST_NUMBER = 4; // Default lowest number for square roots
+    private const int DEFAULT_HIGHEST_NUMBER = 20; // Default highest number for square roots
     
     private readonly SpeechSynthesizer _synthesizer;
     private readonly MediaPlayer _mediaPlayer;
@@ -76,6 +78,8 @@ public partial class MainWindow : Window
         // Initialize UI with default constants
         AnswerTimeTextBox.Text = DEFAULT_SECONDS_TO_ANSWER.ToString();
         IntervalTextBox.Text = DEFAULT_INTERVAL_SECONDS.ToString();
+        LowestNumberTextBox.Text = DEFAULT_LOWEST_NUMBER.ToString();
+        HighestNumberTextBox.Text = DEFAULT_HIGHEST_NUMBER.ToString();
         
         // Update UI with current language
         UpdateUILanguage();
@@ -175,6 +179,8 @@ public partial class MainWindow : Window
         LanguageLabelTextBlock.Text = _currentTexts.LanguageLabel;
         AnswerTimeLabelTextBlock.Text = _currentTexts.AnswerTimeLabel;
         IntervalTimeLabelTextBlock.Text = _currentTexts.IntervalTimeLabel;
+        LowestNumberLabelTextBlock.Text = _currentTexts.LowestNumberLabel;
+        HighestNumberLabelTextBlock.Text = _currentTexts.HighestNumberLabel;
         StartStopButton.Content = _isRunning ? _currentTexts.StopButton : _currentTexts.StartButton;
     }
    
@@ -187,6 +193,8 @@ public partial class MainWindow : Window
         LanguageComboBox.IsEnabled = false;
         AnswerTimeTextBox.IsEnabled = false;
         IntervalTextBox.IsEnabled = false;
+        LowestNumberTextBox.IsEnabled = false;
+        HighestNumberTextBox.IsEnabled = false;
         
         // Keep system awake for audio playback, but allow display to turn off (like Spotify)
         // ES_CONTINUOUS | ES_SYSTEM_REQUIRED keeps system awake
@@ -215,6 +223,8 @@ public partial class MainWindow : Window
         LanguageComboBox.IsEnabled = true;
         AnswerTimeTextBox.IsEnabled = true;
         IntervalTextBox.IsEnabled = true;
+        LowestNumberTextBox.IsEnabled = true;
+        HighestNumberTextBox.IsEnabled = true;
     }
 
     private async Task TrainingLoopAsync(CancellationToken cancellationToken)
@@ -244,8 +254,12 @@ public partial class MainWindow : Window
             // Get the answer time from the UI
             int secondsToAnswer = GetAnswerTimeSeconds();
             
-            // Generate a random number from 1 to 20
-            int number = _random.Next(1, 21);
+            // Get the configured range from the UI
+            int lowestNumber = GetLowestNumber();
+            int highestNumber = GetHighestNumber();
+            
+            // Generate a random number within the configured range
+            int number = _random.Next(lowestNumber, highestNumber + 1);
             int square = number * number;
             
             // Phase 1: Ask the question
@@ -371,6 +385,26 @@ public partial class MainWindow : Window
             return seconds;
         }
         return DEFAULT_INTERVAL_SECONDS;
+    }
+    
+    private int GetLowestNumber()
+    {
+        if (int.TryParse(LowestNumberTextBox.Text, out int number) && number > 0)
+        {
+            return number;
+        }
+        return DEFAULT_LOWEST_NUMBER;
+    }
+    
+    private int GetHighestNumber()
+    {
+        if (int.TryParse(HighestNumberTextBox.Text, out int number) && number > 0)
+        {
+            var lowest = GetLowestNumber();
+            // Ensure highest is at least equal to lowest
+            return number >= lowest ? number : lowest;
+        }
+        return DEFAULT_HIGHEST_NUMBER;
     }
 
     protected override void OnClosed(EventArgs e)

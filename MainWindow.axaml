@@ -3,7 +3,7 @@
         x:Class="MathTrainer.MainWindow"
         Title="Square Root Trainer"
         Width="500"
-        Height="520"
+        Height="640"
         WindowStartupLocation="CenterScreen"
         Background="#F3F4F6"
         CanResize="False">
@@ -83,7 +83,7 @@
 
                 <!-- Settings Form -->
                 <Grid ColumnDefinitions="Auto, *" 
-                      RowDefinitions="Auto,Auto,Auto">
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto">
                     
                     <!-- Language Selection -->
                     <TextBlock Grid.Row="0" Grid.Column="0" Name="LanguageLabelTextBlock" Classes="label" Text="Language" Margin="0,0,20,20"/>
@@ -102,10 +102,24 @@
                              Margin="0,0,0,20"/>
                     
                     <!-- Interval Input -->
-                    <TextBlock Grid.Row="2" Grid.Column="0" Name="IntervalTimeLabelTextBlock" Classes="label" Text="Interval time (s)" Margin="0,0,20,0"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Name="IntervalTimeLabelTextBlock" Classes="label" Text="Interval time (s)" Margin="0,0,20,20"/>
                     <TextBox Grid.Row="2" Grid.Column="1" 
                              Name="IntervalTextBox"
-                             Text="5"/>
+                             Text="5"
+                             Margin="0,0,0,20"/>
+                    
+                    <!-- Lowest Number Input -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" Name="LowestNumberLabelTextBlock" Classes="label" Text="Lowest Number" Margin="0,0,20,20"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" 
+                             Name="LowestNumberTextBox"
+                             Text="1"
+                             Margin="0,0,0,20"/>
+                    
+                    <!-- Highest Number Input -->
+                    <TextBlock Grid.Row="4" Grid.Column="0" Name="HighestNumberLabelTextBlock" Classes="label" Text="Highest Number" Margin="0,0,20,0"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" 
+                             Name="HighestNumberTextBox"
+                             Text="20"/>
                 </Grid>
                 
                 <!-- Countdown Indicator -->

@@ -13,6 +13,8 @@ public interface ILanguageTexts
     string LanguageLabel { get; }
     string AnswerTimeLabel { get; }
     string IntervalTimeLabel { get; }
+    string LowestNumberLabel { get; }
+    string HighestNumberLabel { get; }
     string StartButton { get; }
     string StopButton { get; }
     string CountdownNextQuestion { get; } // Format: "Next question in {0} second(s)"
@@ -34,6 +36,8 @@ public class EnglishTexts : ILanguageTexts
     public string LanguageLabel => "Language";
     public string AnswerTimeLabel => "Time to answer (s)";
     public string IntervalTimeLabel => "Interval time (s)";
+    public string LowestNumberLabel => "Lowest Number";
+    public string HighestNumberLabel => "Highest Number";
     public string StartButton => "Start Training";
     public string StopButton => "Stop";
     public string CountdownNextQuestion => "Next question in {0} {1}";
@@ -55,6 +59,8 @@ public class DutchTexts : ILanguageTexts
     public string LanguageLabel => "Taal";
     public string AnswerTimeLabel => "Tijd om te antwoorden (s)";
     public string IntervalTimeLabel => "Interval tijd (s)";
+    public string LowestNumberLabel => "Laagste Getal";
+    public string HighestNumberLabel => "Hoogste Getal";
     public string StartButton => "Start Training";
     public string StopButton => "Stop";
     public string CountdownNextQuestion => "Volgende vraag over {0} {1}";
