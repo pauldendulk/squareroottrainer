@@ -190,6 +190,42 @@ public partial class MainWindow : Window
    
     private void StartTraining()
     {
+        // Validate raw input values before auto-correction happens
+        bool lowestValid = int.TryParse(LowestNumberTextBox.Text, out int lowestNumber);
+        bool highestValid = int.TryParse(HighestNumberTextBox.Text, out int highestNumber);
+        
+        Console.WriteLine($"Validation: lowest={lowestNumber} ({lowestValid}), highest={highestNumber} ({highestValid}), isInvalid={lowestNumber > highestNumber}");
+        
+        // Check if min > max
+        if (lowestValid && highestValid && lowestNumber > highestNumber)
+        {
+            // Show error message and don't start training
+            Console.WriteLine($"Setting error message: {_currentTexts.ErrorMinMaxValidation}");
+            CountdownTextBlock.Text = _currentTexts.ErrorMinMaxValidation;
+            CountdownTextBlock.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#DC2626"));
+            return;
+        }
+        
+        // Check if lowest < 1
+        if (lowestValid && lowestNumber < 1)
+        {
+            CountdownTextBlock.Text = _currentTexts.ErrorMinTooLow;
+            CountdownTextBlock.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#DC2626"));
+            return;
+        }
+        
+        // Check if highest > 20
+        if (highestValid && highestNumber > MAX_SUPPORTED_NUMBER)
+        {
+            CountdownTextBlock.Text = _currentTexts.ErrorMaxTooHigh;
+            CountdownTextBlock.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#DC2626"));
+            return;
+        }
+        
+        // Clear error message and reset countdown text color
+        CountdownTextBlock.Text = "";
+        CountdownTextBlock.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#6366F1"));
+        
         _isRunning = true;
         StartStopButton.Content = _currentTexts.StopButton;
         
@@ -400,10 +436,15 @@ public partial class MainWindow : Window
     
     private int GetLowestNumber()
     {
-        if (int.TryParse(LowestNumberTextBox.Text, out int number) && number > 0)
+        if (int.TryParse(LowestNumberTextBox.Text, out int number))
         {
-            // Clamp to supported range
-            if (number > MAX_SUPPORTED_NUMBER)
+            // Clamp to supported range (minimum 1, maximum 20)
+            if (number < 1)
+            {
+                number = 1;
+                LowestNumberTextBox.Text = number.ToString();
+            }
+            else if (number > MAX_SUPPORTED_NUMBER)
             {
                 number = MAX_SUPPORTED_NUMBER;
                 LowestNumberTextBox.Text = number.ToString();

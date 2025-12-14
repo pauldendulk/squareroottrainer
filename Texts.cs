@@ -21,6 +21,9 @@ public interface ILanguageTexts
     string CountdownRemaining { get; } // Format: "{0} second(s) remaining"
     string Seconds { get; }
     string Second { get; }
+    string ErrorMinMaxValidation { get; }
+    string ErrorMinTooLow { get; }
+    string ErrorMaxTooHigh { get; }
 }
 
 public class EnglishTexts : ILanguageTexts
@@ -44,6 +47,9 @@ public class EnglishTexts : ILanguageTexts
     public string CountdownRemaining => "{0} {1} remaining";
     public string Seconds => "seconds";
     public string Second => "second";
+    public string ErrorMinMaxValidation => "Min must be ≤ max";
+    public string ErrorMinTooLow => "Min must be ≥ 1";
+    public string ErrorMaxTooHigh => "Max must be ≤ 20";
 }
 
 public class DutchTexts : ILanguageTexts
@@ -67,4 +73,7 @@ public class DutchTexts : ILanguageTexts
     public string CountdownRemaining => "Nog {0} {1}";
     public string Seconds => "seconden";
     public string Second => "seconde";
+    public string ErrorMinMaxValidation => "Min moet ≤ max zijn";
+    public string ErrorMinTooLow => "Min moet ≥ 1 zijn";
+    public string ErrorMaxTooHigh => "Max moet ≤ 20 zijn";
 }
