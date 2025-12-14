@@ -2,20 +2,19 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Media.Core;
-using Windows.Media.Playback;
-using Windows.Storage;
+using NAudio.Wave;
 
 namespace SquareRootTrainer;
 
 /// <summary>
-/// Manages audio playback for the training session using Windows MediaPlayer.
+/// Manages audio playback for the training session using NAudio.
 /// </summary>
-public class TrainingAudioPlayer : IDisposable
+public class TrainingAudioPlayer : IAudioPlayer
 {
-    private readonly MediaPlayer _mediaPlayer;
     private readonly string _audioBasePath;
+    private IWavePlayer? _waveOutDevice;
+    private AudioFileReader? _audioFileReader;
+    private readonly object _lockObject = new();
     
     /// <summary>
     /// Creates a new audio player.
@@ -24,7 +23,6 @@ public class TrainingAudioPlayer : IDisposable
     public TrainingAudioPlayer(string audioBasePath)
     {
         _audioBasePath = audioBasePath;
-        _mediaPlayer = new MediaPlayer();
     }
     
     /// <summary>
@@ -46,31 +44,32 @@ public class TrainingAudioPlayer : IDisposable
                 Console.WriteLine($"Warning: Audio file not found: {audioPath}");
                 return;
             }
-            
-            var file = await StorageFile.GetFileFromPathAsync(audioPath);
-            
+
             var tcs = new TaskCompletionSource();
             
-            // Define handler to signal completion
-            TypedEventHandler<MediaPlayer, object> onEnded = (s, e) => tcs.TrySetResult();
-            
-            try
+            lock (_lockObject)
             {
-                _mediaPlayer.MediaEnded += onEnded;
-                _mediaPlayer.Source = MediaSource.CreateFromStorageFile(file);
-                _mediaPlayer.Play();
+                // Clean up any existing playback
+                CleanupPlayback();
                 
-                // Wait for playback to finish or cancellation
-                await tcs.Task.WaitAsync(cancellationToken);
+                // Create new audio file reader and output device
+                _audioFileReader = new AudioFileReader(audioPath);
+                _waveOutDevice = new WaveOutEvent();
+                
+                // Set up playback stopped event
+                _waveOutDevice.PlaybackStopped += (s, e) => tcs.TrySetResult();
+                
+                // Initialize and play
+                _waveOutDevice.Init(_audioFileReader);
+                _waveOutDevice.Play();
             }
-            finally
-            {
-                _mediaPlayer.MediaEnded -= onEnded;
-            }
+            
+            // Wait for playback to finish or cancellation
+            await tcs.Task.WaitAsync(cancellationToken);
         }
         catch (OperationCanceledException)
         {
-            _mediaPlayer.Pause();
+            Stop();
             throw;
         }
         catch (Exception ex)
@@ -84,11 +83,28 @@ public class TrainingAudioPlayer : IDisposable
     /// </summary>
     public void Stop()
     {
-        _mediaPlayer.Pause();
+        lock (_lockObject)
+        {
+            CleanupPlayback();
+        }
+    }
+    
+    private void CleanupPlayback()
+    {
+        // Must be called within lock
+        _waveOutDevice?.Stop();
+        _waveOutDevice?.Dispose();
+        _waveOutDevice = null;
+        
+        _audioFileReader?.Dispose();
+        _audioFileReader = null;
     }
     
     public void Dispose()
     {
-        _mediaPlayer.Dispose();
+        lock (_lockObject)
+        {
+            CleanupPlayback();
+        }
     }
 }

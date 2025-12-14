@@ -32,7 +32,7 @@ public partial class MainWindow : Window
     private const uint ES_DISPLAY_REQUIRED = 0x00000002;
     private const uint ES_AWAYMODE_REQUIRED = 0x00000040;
     // Change these constants to adjust timing
-    private const int DEFAULT_INTERVAL_SECONDS = 60; // Default time between question cycles
+    private const int DEFAULT_INTERVAL_SECONDS = 300; // Default time between question cycles
     private const int DEFAULT_SECONDS_TO_ANSWER = 3; // Default time given to answer the question
     private const int DEFAULT_LOWEST_NUMBER = 4; // Default lowest number for square roots
     private const int DEFAULT_HIGHEST_NUMBER = 20; // Default highest number for square roots
@@ -43,7 +43,7 @@ public partial class MainWindow : Window
     private const string ERROR_COLOR = "#DC2626"; // Warm red for errors
     private const string NORMAL_COLOR = "#6366F1"; // Blue for normal countdown
     
-    private readonly TrainingAudioPlayer _audioPlayer;
+    private readonly IAudioPlayer _audioPlayer;
     private readonly TrainingSession _trainingSession;
     private ILanguageTexts _currentTexts;
     private List<LanguageOption> _availableLanguages = new();
