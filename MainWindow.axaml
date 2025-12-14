@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="MathTrainer.MainWindow"
+        x:Class="SquareRootTrainer.MainWindow"
         Title="Square Root Trainer"
         Width="500"
         Height="700"

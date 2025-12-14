@@ -13,7 +13,7 @@ using Windows.Media.Core;
 using Windows.Media.Playback;
 using Windows.Media.SpeechSynthesis;
 
-namespace MathTrainer;
+namespace SquareRootTrainer;
 
 // Helper class to store language information
 public class LanguageOption

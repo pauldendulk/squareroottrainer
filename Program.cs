@@ -1,7 +1,7 @@
 using Avalonia;
 using System;
 
-namespace MathTrainer;
+namespace SquareRootTrainer;
 
 class Program
 {

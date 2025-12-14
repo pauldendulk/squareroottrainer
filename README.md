@@ -28,6 +28,6 @@ The app randomly selects from square roots 1-20 (perfect squares 1-400), helping
 ## Installation
 
 ```powershell
-dotnet build MathTrainer.csproj
-dotnet run --project MathTrainer.csproj
+dotnet build SquareRootTrainer.csproj
+dotnet run --project SquareRootTrainer.csproj
 ```

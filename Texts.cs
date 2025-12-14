@@ -1,4 +1,4 @@
-namespace MathTrainer;
+namespace SquareRootTrainer;
 
 public interface ILanguageTexts
 {

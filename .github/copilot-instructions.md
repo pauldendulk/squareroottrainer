@@ -43,7 +43,7 @@ This is a Windows desktop application built with:
 
 ## Testing & Verification
 - **After making changes, run the application** using `dotnet run` so the user can see how it looks
-- Only use `dotnet build MathTrainer.csproj` if you specifically need to check for compilation errors without showing the UI
+- Only use `dotnet build SquareRootTrainer.csproj` if you specifically need to check for compilation errors without showing the UI
 - **Always run tests if they exist** using `dotnet test`
 - Verify that the application compiles without errors before completing a task
 - Check for compiler warnings and address them when possible
