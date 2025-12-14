@@ -89,12 +89,9 @@
                     <TextBlock Grid.Row="0" Grid.Column="0" Name="LanguageLabelTextBlock" Classes="label" Text="Language" Margin="0,0,20,20"/>
                     <ComboBox Grid.Row="0" Grid.Column="1" 
                               Name="LanguageComboBox"
-                              SelectedIndex="1"
                               HorizontalAlignment="Stretch"
                               Margin="0,0,0,20"
                               SelectionChanged="LanguageComboBox_SelectionChanged">
-                        <ComboBoxItem Content="English"/>
-                        <ComboBoxItem Content="Dutch"/>
                     </ComboBox>
                     
                     <!-- Answer Time Input -->

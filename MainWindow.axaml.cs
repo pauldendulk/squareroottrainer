@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -14,6 +15,16 @@ using Windows.Media.SpeechSynthesis;
 
 namespace MathTrainer;
 
+// Helper class to store language information
+public class LanguageOption
+{
+    public required string DisplayName { get; init; }
+    public required string LanguageCode { get; init; }
+    public required VoiceInformation Voice { get; init; }
+    
+    public override string ToString() => DisplayName;
+}
+
 public partial class MainWindow : Window
 {
     // Windows API to prevent system sleep
@@ -22,9 +33,10 @@ public partial class MainWindow : Window
 
     private const uint ES_CONTINUOUS = 0x80000000;
     private const uint ES_SYSTEM_REQUIRED = 0x00000001;
+    private const uint ES_DISPLAY_REQUIRED = 0x00000002;
     private const uint ES_AWAYMODE_REQUIRED = 0x00000040;
     // Change these constants to adjust timing
-    private const int DEFAULT_INTERVAL_SECONDS = 5; // Default time between question cycles
+    private const int DEFAULT_INTERVAL_SECONDS = 60; // Default time between question cycles
     private const int DEFAULT_SECONDS_TO_ANSWER = 3; // Default time given to answer the question
     private const int BRIEF_PAUSE_MS = 1000; // Brief pause after asking question (in milliseconds)
     
@@ -34,6 +46,7 @@ public partial class MainWindow : Window
     private bool _isRunning = false;
     private CancellationTokenSource? _cancellationTokenSource;
     private ILanguageTexts _currentTexts;
+    private List<LanguageOption> _availableLanguages = new();
 
     public MainWindow()
     {
@@ -41,23 +54,24 @@ public partial class MainWindow : Window
 
         _synthesizer = new SpeechSynthesizer();
         _mediaPlayer = new MediaPlayer();
-
-        // Debug available voices
-        foreach (var voice in SpeechSynthesizer.AllVoices)
-        {
-            Console.WriteLine($"{voice.DisplayName} | {voice.Language}");
-        }
-
-        // Set Dutch voice immediately after creation
-        SetVoice("nl-NL");
-        
         _random = new Random();
 
-        // Ensure the UI reflects the Dutch default so it doesn't switch back to English on start
-        LanguageComboBox.SelectedIndex = 1;
+        // Populate available languages from installed voices
+        PopulateAvailableLanguages();
         
-        // Initialize current texts to Dutch
-        _currentTexts = new DutchTexts();
+        // Initialize current texts to Dutch or fallback to English
+        var dutchLanguage = _availableLanguages.FirstOrDefault(l => l.LanguageCode.StartsWith("nl"));
+        var defaultLanguage = dutchLanguage ?? _availableLanguages.FirstOrDefault();
+        
+        if (defaultLanguage != null)
+        {
+            _synthesizer.Voice = defaultLanguage.Voice;
+            _currentTexts = defaultLanguage.LanguageCode.StartsWith("nl") ? new DutchTexts() : new EnglishTexts();
+        }
+        else
+        {
+            _currentTexts = new EnglishTexts();
+        }
         
         // Initialize UI with default constants
         AnswerTimeTextBox.Text = DEFAULT_SECONDS_TO_ANSWER.ToString();
@@ -65,6 +79,49 @@ public partial class MainWindow : Window
         
         // Update UI with current language
         UpdateUILanguage();
+    }
+    
+    private void PopulateAvailableLanguages()
+    {
+        // Get all unique languages from installed voices
+        var languageGroups = SpeechSynthesizer.AllVoices
+            .GroupBy(v => v.Language)
+            .OrderBy(g => g.Key);
+        
+        foreach (var group in languageGroups)
+        {
+            var voice = group.First(); // Use the first voice for each language
+            var languageCode = voice.Language;
+            
+            // Try to get a friendly display name
+            string displayName;
+            try
+            {
+                var culture = new CultureInfo(languageCode);
+                displayName = $"{culture.DisplayName} ({languageCode})";
+            }
+            catch
+            {
+                // Fallback if culture info is not available
+                displayName = $"{voice.DisplayName} ({languageCode})";
+            }
+            
+            _availableLanguages.Add(new LanguageOption
+            {
+                DisplayName = displayName,
+                LanguageCode = languageCode,
+                Voice = voice
+            });
+            
+            Console.WriteLine($"Available: {displayName}");
+        }
+        
+        // Populate the ComboBox
+        LanguageComboBox.ItemsSource = _availableLanguages;
+        
+        // Try to select Dutch by default, otherwise select first
+        var dutchIndex = _availableLanguages.FindIndex(l => l.LanguageCode.StartsWith("nl"));
+        LanguageComboBox.SelectedIndex = dutchIndex >= 0 ? dutchIndex : 0;
     }
 
     private void StartStopButton_Click(object? sender, RoutedEventArgs e)
@@ -82,7 +139,7 @@ public partial class MainWindow : Window
     private void LanguageComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         // Ignore events during initialization before controls are ready
-        if (LanguageComboBox == null)
+        if (LanguageComboBox == null || LanguageComboBox.SelectedItem == null)
         {
             return;
         }
@@ -93,7 +150,20 @@ public partial class MainWindow : Window
             return;
         }
         
-        _currentTexts = IsEnglish ? new EnglishTexts() : new DutchTexts();
+        var selectedLanguage = (LanguageOption)LanguageComboBox.SelectedItem;
+        _synthesizer.Voice = selectedLanguage.Voice;
+        
+        // Determine which text set to use based on language code
+        // Support for nl-* for Dutch, en-* for English, fallback to English for others
+        if (selectedLanguage.LanguageCode.StartsWith("nl"))
+        {
+            _currentTexts = new DutchTexts();
+        }
+        else
+        {
+            _currentTexts = new EnglishTexts();
+        }
+        
         UpdateUILanguage();
     }
     
@@ -107,34 +177,7 @@ public partial class MainWindow : Window
         IntervalTimeLabelTextBlock.Text = _currentTexts.IntervalTimeLabel;
         StartStopButton.Content = _isRunning ? _currentTexts.StopButton : _currentTexts.StartButton;
     }
-
-    private bool IsEnglish => LanguageComboBox.SelectedIndex == 0;
-    
-    private void SetVoiceForLanguage()
-    {
-        SetVoice(IsEnglish ? "en-US" : "nl-NL");
-    }
-
-    private void SetVoice(string cultureCode)
-    {
-        try
-        {
-            var voice = SpeechSynthesizer.AllVoices.FirstOrDefault(v => v.Language.Contains(cultureCode));
-            if (voice != null)
-            {
-                _synthesizer.Voice = voice;
-            }
-            else
-            {
-                Console.WriteLine($"Voice for {cultureCode} not found.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Could not set voice: {ex.Message}");
-        }
-    }
-    
+   
     private void StartTraining()
     {
         _isRunning = true;
@@ -145,7 +188,9 @@ public partial class MainWindow : Window
         AnswerTimeTextBox.IsEnabled = false;
         IntervalTextBox.IsEnabled = false;
         
-        // Prevent system from sleeping while training
+        // Keep system awake for audio playback, but allow display to turn off (like Spotify)
+        // ES_CONTINUOUS | ES_SYSTEM_REQUIRED keeps system awake
+        // ES_AWAYMODE_REQUIRED allows display sleep while playing audio
         SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
         
         _cancellationTokenSource = new CancellationTokenSource();
@@ -182,7 +227,6 @@ public partial class MainWindow : Window
             {
                 // Get the interval from the UI
                 int intervalSeconds = GetIntervalSeconds();
-                SetVoiceForLanguage();
                 
                 // Display countdown and wait for the interval before the next question cycle
                 await CountdownAsync(intervalSeconds, true, cancellationToken);
@@ -205,7 +249,6 @@ public partial class MainWindow : Window
             int square = number * number;
             
             // Phase 1: Ask the question
-            SetVoiceForLanguage();
             string question = string.Format(_currentTexts.Question, square);
             await SpeakTextAsync(question, cancellationToken);
             
