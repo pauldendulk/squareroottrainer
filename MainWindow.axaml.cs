@@ -9,10 +9,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Media.Core;
-using Windows.Media.Playback;
-using Windows.Storage;
 
 namespace SquareRootTrainer;
 
@@ -47,7 +43,7 @@ public partial class MainWindow : Window
     private const string ERROR_COLOR = "#DC2626"; // Warm red for errors
     private const string NORMAL_COLOR = "#6366F1"; // Blue for normal countdown
     
-    private readonly MediaPlayer _mediaPlayer;
+    private readonly TrainingAudioPlayer _audioPlayer;
     private readonly TrainingSession _trainingSession;
     private ILanguageTexts _currentTexts;
     private List<LanguageOption> _availableLanguages = new();
@@ -57,7 +53,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        _mediaPlayer = new MediaPlayer();
+        // Set audio base path
+        _audioBasePath = Path.Combine(AppContext.BaseDirectory, "audio");
+        
+        // Initialize audio player
+        _audioPlayer = new TrainingAudioPlayer(_audioBasePath);
         
         // Initialize training session with callbacks
         _trainingSession = new TrainingSession(
@@ -65,9 +65,6 @@ public partial class MainWindow : Window
             updateCountdownCallback: UpdateCountdownTextAsync,
             formatCountdownCallback: FormatAndUpdateCountdownAsync
         );
-
-        // Set audio base path
-        _audioBasePath = Path.Combine(AppContext.BaseDirectory, "audio");
         
         // Populate available languages from audio folders
         PopulateAvailableLanguages();
@@ -319,48 +316,7 @@ public partial class MainWindow : Window
     /// </summary>
     private async Task PlayAudioFileAsync(string fileName, string languageCode, CancellationToken cancellationToken)
     {
-        if (cancellationToken.IsCancellationRequested) return;
-
-        try
-        {
-            var audioPath = Path.Combine(_audioBasePath, languageCode, fileName);
-            
-            if (!File.Exists(audioPath))
-            {
-                Console.WriteLine($"Warning: Audio file not found: {audioPath}");
-                return;
-            }
-            
-            var file = await StorageFile.GetFileFromPathAsync(audioPath);
-            
-            var tcs = new TaskCompletionSource();
-            
-            // Define handler to signal completion
-            TypedEventHandler<MediaPlayer, object> onEnded = (s, e) => tcs.TrySetResult();
-            
-            try
-            {
-                _mediaPlayer.MediaEnded += onEnded;
-                _mediaPlayer.Source = MediaSource.CreateFromStorageFile(file);
-                _mediaPlayer.Play();
-                
-                // Wait for playback to finish or cancellation
-                await tcs.Task.WaitAsync(cancellationToken);
-            }
-            finally
-            {
-                _mediaPlayer.MediaEnded -= onEnded;
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            _mediaPlayer.Pause();
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Audio playback error: {ex.Message}");
-        }
+        await _audioPlayer.PlayAsync(fileName, languageCode, cancellationToken);
     }
     
     /// <summary>
@@ -374,7 +330,7 @@ public partial class MainWindow : Window
     /// <summary>
     /// Callback for TrainingSession to format and update countdown text.
     /// </summary>
-    private async Task FormatAndUpdateCountdownAsync(int seconds, bool isNextQuestion, string _, string __)
+    private async Task FormatAndUpdateCountdownAsync(int seconds, bool isNextQuestion)
     {
         await Dispatcher.UIThread.InvokeAsync(() => 
         {
@@ -440,7 +396,7 @@ public partial class MainWindow : Window
         
         // Ensure power management is restored when window closes
         SetThreadExecutionState(ES_CONTINUOUS);
-        _mediaPlayer.Dispose();
+        _audioPlayer.Dispose();
         base.OnClosed(e);
     }
 }

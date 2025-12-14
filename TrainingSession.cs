@@ -30,7 +30,7 @@ public class TrainingSession
     // Callbacks for external operations
     private readonly Func<string, string, CancellationToken, Task> _playAudioCallback;
     private readonly Func<string, Task> _updateCountdownCallback;
-    private readonly Func<int, bool, string, string, Task> _formatCountdownCallback;
+    private readonly Func<int, bool, Task> _formatCountdownCallback;
     
     public bool IsRunning => _isRunning;
     
@@ -39,11 +39,11 @@ public class TrainingSession
     /// </summary>
     /// <param name="playAudioCallback">Callback to play audio files (filename, languageCode, cancellationToken)</param>
     /// <param name="updateCountdownCallback">Callback to update countdown text in UI</param>
-    /// <param name="formatCountdownCallback">Callback to format countdown text (seconds, isNextQuestion, secondWord, secondsWord)</param>
+    /// <param name="formatCountdownCallback">Callback to format countdown text (seconds, isNextQuestion)</param>
     public TrainingSession(
         Func<string, string, CancellationToken, Task> playAudioCallback,
         Func<string, Task> updateCountdownCallback,
-        Func<int, bool, string, string, Task> formatCountdownCallback)
+        Func<int, bool, Task> formatCountdownCallback)
     {
         _random = new Random();
         _playAudioCallback = playAudioCallback;
@@ -149,7 +149,7 @@ public class TrainingSession
             if (cancellationToken.IsCancellationRequested) break;
             
             // Use callback to format and display countdown
-            await _formatCountdownCallback(i, isNextQuestion, "", "");
+            await _formatCountdownCallback(i, isNextQuestion);
             
             // Wait 1 second
             await Task.Delay(1000, cancellationToken);
