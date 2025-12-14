@@ -3,7 +3,7 @@
         x:Class="MathTrainer.MainWindow"
         Title="Square Root Trainer"
         Width="500"
-        Height="640"
+        Height="700"
         WindowStartupLocation="CenterScreen"
         Background="#F3F4F6"
         CanResize="False">
@@ -78,7 +78,10 @@
                                Text="Sharpen your mental math skills" 
                                FontSize="14" 
                                Foreground="#6B7280"
-                               HorizontalAlignment="Center"/>
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               MaxWidth="420"/>
                 </StackPanel>
 
                 <!-- Settings Form -->
@@ -130,7 +133,8 @@
                            Foreground="#6366F1"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
-                           MinHeight="30"/>
+                           MinHeight="30"
+                           Margin="0,0,0,0"/>
                 
                 <!-- Action Button -->
                 <Button Name="StartStopButton"
@@ -139,7 +143,7 @@
                         Click="StartStopButton_Click"
                         HorizontalAlignment="Stretch"
                         Height="50"
-                        Margin="0,10,0,0"/>
+                        Margin="0,5,0,0"/>
             </StackPanel>
         </Border>
     </Border>

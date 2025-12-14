@@ -32,7 +32,7 @@ public class EnglishTexts : ILanguageTexts
     
     // UI texts
     public string WindowTitle => "Square Root Trainer";
-    public string WindowSubtitle => "Sharpen your mental math skills";
+    public string WindowSubtitle => "Start the app and keep it running in the background while you answer the questions in your head when they come up.";
     public string LanguageLabel => "Language";
     public string AnswerTimeLabel => "Time to answer (s)";
     public string IntervalTimeLabel => "Interval time (s)";
@@ -55,7 +55,7 @@ public class DutchTexts : ILanguageTexts
     
     // UI texts
     public string WindowTitle => "Worteltrainer";
-    public string WindowSubtitle => "Verbeter je hoofdrekenen";
+    public string WindowSubtitle => "Start de app en laat deze op de achtergrond draaien terwijl je de vragen in je hoofd beantwoordt wanneer ze verschijnen.";
     public string LanguageLabel => "Taal";
     public string AnswerTimeLabel => "Tijd om te antwoorden (s)";
     public string IntervalTimeLabel => "Interval tijd (s)";
