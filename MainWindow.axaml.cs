@@ -38,7 +38,6 @@ public partial class MainWindow : Window
     // Change these constants to adjust timing
     private const int DEFAULT_INTERVAL_SECONDS = 60; // Default time between question cycles
     private const int DEFAULT_SECONDS_TO_ANSWER = 3; // Default time given to answer the question
-    private const int BRIEF_PAUSE_MS = 1000; // Brief pause after asking question (in milliseconds)
     private const int DEFAULT_LOWEST_NUMBER = 4; // Default lowest number for square roots
     private const int DEFAULT_HIGHEST_NUMBER = 20; // Default highest number for square roots
     private const int MAX_SUPPORTED_NUMBER = 20; // Maximum number supported by audio files
@@ -49,9 +48,7 @@ public partial class MainWindow : Window
     private const string NORMAL_COLOR = "#6366F1"; // Blue for normal countdown
     
     private readonly MediaPlayer _mediaPlayer;
-    private readonly Random _random;
-    private bool _isRunning = false;
-    private CancellationTokenSource? _cancellationTokenSource;
+    private readonly TrainingSession _trainingSession;
     private ILanguageTexts _currentTexts;
     private List<LanguageOption> _availableLanguages = new();
     private string _audioBasePath = "";
@@ -61,7 +58,13 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         _mediaPlayer = new MediaPlayer();
-        _random = new Random();
+        
+        // Initialize training session with callbacks
+        _trainingSession = new TrainingSession(
+            playAudioCallback: PlayAudioFileAsync,
+            updateCountdownCallback: UpdateCountdownTextAsync,
+            formatCountdownCallback: FormatAndUpdateCountdownAsync
+        );
 
         // Set audio base path
         _audioBasePath = Path.Combine(AppContext.BaseDirectory, "audio");
@@ -194,7 +197,7 @@ public partial class MainWindow : Window
     
     private void StartStopButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (_isRunning)
+        if (_trainingSession.IsRunning)
         {
             StopTraining();
         }
@@ -212,7 +215,7 @@ public partial class MainWindow : Window
             return;
         }
         
-        if (_isRunning)
+        if (_trainingSession.IsRunning)
         {
             // Don't allow language change while training is running
             return;
@@ -244,7 +247,7 @@ public partial class MainWindow : Window
         IntervalTimeLabelTextBlock.Text = _currentTexts.IntervalTimeLabel;
         LowestNumberLabelTextBlock.Text = _currentTexts.LowestNumberLabel;
         HighestNumberLabelTextBlock.Text = _currentTexts.HighestNumberLabel;
-        StartStopButton.Content = _isRunning ? _currentTexts.StopButton : _currentTexts.StartButton;
+        StartStopButton.Content = _trainingSession.IsRunning ? _currentTexts.StopButton : _currentTexts.StartButton;
     }
    
     private void StartTraining()
@@ -259,7 +262,21 @@ public partial class MainWindow : Window
         // Clear any previous error and reset text color
         ClearValidationError();
         
-        _isRunning = true;
+        // Get selected language
+        var selectedLanguage = (LanguageOption?)LanguageComboBox.SelectedItem;
+        if (selectedLanguage == null) return;
+        
+        // Create configuration from UI inputs
+        var config = new TrainingSessionConfig
+        {
+            AnswerTimeSeconds = GetAnswerTimeSeconds(),
+            IntervalSeconds = GetIntervalSeconds(),
+            LowestNumber = GetLowestNumber(),
+            HighestNumber = GetHighestNumber(),
+            LanguageCode = selectedLanguage.LanguageCode
+        };
+        
+        // Update UI state
         StartStopButton.Content = _currentTexts.StopButton;
         
         // Disable the input fields while running
@@ -274,23 +291,18 @@ public partial class MainWindow : Window
         // ES_AWAYMODE_REQUIRED allows display sleep while playing audio
         SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
         
-        _cancellationTokenSource = new CancellationTokenSource();
-        
-        // Start the training loop
-        _ = TrainingLoopAsync(_cancellationTokenSource.Token);
+        // Start the training session
+        _trainingSession.Start(config);
     }
 
-    private void StopTraining()
+    private async void StopTraining()
     {
-        _isRunning = false;
-        _cancellationTokenSource?.Cancel();
+        await _trainingSession.StopAsync();
+        
         StartStopButton.Content = _currentTexts.StartButton;
         
         // Restore normal power management
         SetThreadExecutionState(ES_CONTINUOUS);
-        
-        // Clear the countdown indicator
-        CountdownTextBlock.Text = "";
         
         // Re-enable the input fields
         LanguageComboBox.IsEnabled = true;
@@ -300,81 +312,11 @@ public partial class MainWindow : Window
         HighestNumberTextBox.IsEnabled = true;
     }
 
-    private async Task TrainingLoopAsync(CancellationToken cancellationToken)
-    {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            await AskQuestionCycleAsync(cancellationToken);
-            
-            if (!cancellationToken.IsCancellationRequested)
-            {
-                // Get the interval from the UI
-                int intervalSeconds = GetIntervalSeconds();
-                
-                // Display countdown and wait for the interval before the next question cycle
-                await CountdownAsync(intervalSeconds, true, cancellationToken);
-            }
-        }
-        
-        // Clear countdown when stopped
-        await Dispatcher.UIThread.InvokeAsync(() => CountdownTextBlock.Text = "");
-    }
-
-    private async Task AskQuestionCycleAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            // Get the answer time from the UI
-            int secondsToAnswer = GetAnswerTimeSeconds();
-            
-            // Get the configured range from the UI
-            int lowestNumber = GetLowestNumber();
-            int highestNumber = GetHighestNumber();
-            
-            // Generate a random number within the configured range
-            int number = _random.Next(lowestNumber, highestNumber + 1);
-            
-            // Get selected language
-            var selectedLanguage = (LanguageOption?)LanguageComboBox.SelectedItem;
-            if (selectedLanguage == null) return;
-            
-            // Phase 1: Ask the question
-            await PlayAudioFileAsync($"question_{number}.wav", selectedLanguage.LanguageCode, cancellationToken);
-            
-            if (cancellationToken.IsCancellationRequested) return;
-            
-            // Phase 2: Brief pause
-            await Task.Delay(BRIEF_PAUSE_MS, cancellationToken);
-            
-            if (cancellationToken.IsCancellationRequested) return;
-            
-            // Phase 3: Announcement
-            await PlayAudioFileAsync("announcement.wav", selectedLanguage.LanguageCode, cancellationToken);
-            
-            if (cancellationToken.IsCancellationRequested) return;
-            
-            // Phase 4: Wait for the answer time with countdown
-            await CountdownAsync(secondsToAnswer, false, cancellationToken);
-            
-            if (cancellationToken.IsCancellationRequested) return;
-            
-            // Phase 5: Give the answer
-            await PlayAudioFileAsync($"answer_{number}.wav", selectedLanguage.LanguageCode, cancellationToken);
-        }
-        catch (TaskCanceledException)
-        {
-            // Expected when stopping
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected when stopping during await
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in question cycle: {ex.Message}");
-        }
-    }
-
+    // Callback methods for TrainingSession
+    
+    /// <summary>
+    /// Callback for TrainingSession to play audio files.
+    /// </summary>
     private async Task PlayAudioFileAsync(string fileName, string languageCode, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested) return;
@@ -421,32 +363,31 @@ public partial class MainWindow : Window
         }
     }
     
-    private async Task CountdownAsync(int seconds, bool isNextQuestion, CancellationToken cancellationToken)
+    /// <summary>
+    /// Callback for TrainingSession to update countdown text.
+    /// </summary>
+    private async Task UpdateCountdownTextAsync(string text)
     {
-        for (int i = seconds; i > 0; i--)
+        await Dispatcher.UIThread.InvokeAsync(() => CountdownTextBlock.Text = text);
+    }
+    
+    /// <summary>
+    /// Callback for TrainingSession to format and update countdown text.
+    /// </summary>
+    private async Task FormatAndUpdateCountdownAsync(int seconds, bool isNextQuestion, string _, string __)
+    {
+        await Dispatcher.UIThread.InvokeAsync(() => 
         {
-            if (cancellationToken.IsCancellationRequested) break;
-            
-            // Update UI on the UI thread with different text based on context
-            await Dispatcher.UIThread.InvokeAsync(() => 
+            string secondWord = seconds != 1 ? _currentTexts.Seconds : _currentTexts.Second;
+            if (isNextQuestion)
             {
-                string secondWord = i != 1 ? _currentTexts.Seconds : _currentTexts.Second;
-                if (isNextQuestion)
-                {
-                    CountdownTextBlock.Text = string.Format(_currentTexts.CountdownNextQuestion, i, secondWord);
-                }
-                else
-                {
-                    CountdownTextBlock.Text = string.Format(_currentTexts.CountdownRemaining, i, secondWord);
-                }
-            });
-            
-            // Wait 1 second
-            await Task.Delay(1000, cancellationToken);
-        }
-        
-        // Clear the countdown text
-        await Dispatcher.UIThread.InvokeAsync(() => CountdownTextBlock.Text = "");
+                CountdownTextBlock.Text = string.Format(_currentTexts.CountdownNextQuestion, seconds, secondWord);
+            }
+            else
+            {
+                CountdownTextBlock.Text = string.Format(_currentTexts.CountdownRemaining, seconds, secondWord);
+            }
+        });
     }
     
     private int GetAnswerTimeSeconds()
@@ -493,9 +434,9 @@ public partial class MainWindow : Window
         return DEFAULT_HIGHEST_NUMBER;
     }
 
-    protected override void OnClosed(EventArgs e)
+    protected override async void OnClosed(EventArgs e)
     {
-        _cancellationTokenSource?.Cancel();
+        await _trainingSession.StopAsync();
         
         // Ensure power management is restored when window closes
         SetThreadExecutionState(ES_CONTINUOUS);
