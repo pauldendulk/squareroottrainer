@@ -8,8 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-squareroottrainer:
     runs-on: windows-latest
+    name: Build SquareRootTrainer
     
     steps:
     - name: Checkout code
@@ -20,21 +21,78 @@ jobs:
       with:
         dotnet-version: '9.0.x'
         
-    - name: Install workloads
-      run: dotnet workload restore SquareRootTrainer.csproj
-        
     - name: Restore dependencies
-      run: dotnet restore SquareRootTrainer.csproj
+      run: dotnet restore SquareRootTrainer/SquareRootTrainer.csproj
       
     - name: Build
-      run: dotnet build SquareRootTrainer.csproj --configuration Release --no-restore
+      run: dotnet build SquareRootTrainer/SquareRootTrainer.csproj --configuration Release --no-restore
       
     - name: Test
-      run: dotnet test SquareRootTrainer.csproj --configuration Release --no-build --verbosity normal
+      run: dotnet test SquareRootTrainer/SquareRootTrainer.csproj --configuration Release --no-build --verbosity normal
       continue-on-error: true
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: SquareRootTrainer-Windows
-        path: bin/Release/net9.0-windows10.0.19041.0/
+        path: SquareRootTrainer/bin/Release/net9.0-windows10.0.19041.0/
+
+  build-carrots-desktop:
+    runs-on: windows-latest
+    name: Build Carrots Desktop
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore Carrots/Carrots.Desktop/Carrots.Desktop.csproj
+      
+    - name: Build
+      run: dotnet build Carrots/Carrots.Desktop/Carrots.Desktop.csproj --configuration Release --no-restore
+      
+    - name: Test
+      run: dotnet test Carrots/Carrots.Desktop/Carrots.Desktop.csproj --configuration Release --no-build --verbosity normal
+      continue-on-error: true
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Carrots-Desktop-Windows
+        path: Carrots/Carrots.Desktop/bin/Release/net9.0/
+
+  build-carrots-browser:
+    runs-on: ubuntu-latest
+    name: Build Carrots Browser
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Install wasm-tools workload
+      run: dotnet workload install wasm-tools
+        
+    - name: Restore dependencies
+      run: dotnet restore Carrots/Carrots.Browser/Carrots.Browser.csproj
+      
+    - name: Build
+      run: dotnet build Carrots/Carrots.Browser/Carrots.Browser.csproj --configuration Release --no-restore
+      
+    - name: Publish
+      run: dotnet publish Carrots/Carrots.Browser/Carrots.Browser.csproj --configuration Release --no-build --output ./publish
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Carrots-Browser-WASM
+        path: ./publish/wwwroot/
