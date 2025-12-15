@@ -5,8 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="700"
              x:Class="Carrots.Views.MainView"
-             x:DataType="vm:MainViewModel"
-             Background="#F3F4F6">
+             x:DataType="vm:MainViewModel">
     <UserControl.Styles>
         <!-- Label Style -->
         <Style Selector="TextBlock.label">
@@ -57,8 +56,10 @@
         </Style>
     </UserControl.Styles>
 
-    <!-- Main Container -->
-    <Border Padding="40">
+    <!-- Background Panel - Full Width -->
+    <Panel Background="#F3F4F6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <!-- Main Container - Centered with Max Width -->
+        <Border Padding="40" MaxWidth="665" HorizontalAlignment="Center">
         <!-- Card -->
         <Border Background="White" 
                 CornerRadius="16" 
@@ -176,4 +177,5 @@
             </StackPanel>
         </Border>
     </Border>
+    </Panel>
 </UserControl>
