@@ -179,6 +179,10 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
+# Local publish/test outputs
+_local_publish_*/
+_local_pages_root/
+
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
@@ -397,3 +401,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 .idea/
+_local_publish_test2/

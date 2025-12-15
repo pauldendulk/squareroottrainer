@@ -39,7 +39,7 @@ jobs:
       run: dotnet restore Carrots/Carrots.Browser/Carrots.Browser.csproj
       
     - name: Publish
-      run: dotnet publish Carrots/Carrots.Browser/Carrots.Browser.csproj --configuration Release --output publish
+      run: dotnet publish Carrots/Carrots.Browser/Carrots.Browser.csproj --configuration Release --output publish /p:WasmEnableThreads=false /p:WasmEnableAOT=false
       
     - name: Add .nojekyll file
       run: touch publish/wwwroot/.nojekyll
