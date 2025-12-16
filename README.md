@@ -4,6 +4,10 @@ A desktop application that helps you memorize square roots of numbers 1-20 throu
 
 ![Square Root Trainer Application](docs/screenshot.png)
 
+### Background
+
+My daughter had a math test last week. She had to know the square roots of all numbers up to twenty. Her teacher said she taught this to her son by asking questions at random moments during the day. So I built an app that you can run in the background to asks for square roots at set intervals (five minutes by default),
+
 ## What It Does
 
 Square Root Trainer uses pre-generated audio files to quiz you on square roots at regular intervals. The app plays a question (like "What is the square root of 144?"), gives you time to think, and then tells you the answer. This hands-free approach lets you practice while doing other tasks.
