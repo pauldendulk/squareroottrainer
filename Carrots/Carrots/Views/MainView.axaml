@@ -56,16 +56,20 @@
         </Style>
     </UserControl.Styles>
 
-    <!-- Background Panel - Full Width -->
-    <Panel Background="#F3F4F6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <!-- Scrollable background so the Start/Stop button is reachable on small screens -->
+    <ScrollViewer Background="#F3F4F6"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
         <!-- Main Container - Centered with Max Width -->
         <Border Padding="40" MaxWidth="665" HorizontalAlignment="Center">
-        <!-- Card -->
-        <Border Background="White" 
-                CornerRadius="16" 
-                BoxShadow="0 4 15 0 #1A000000">
-            
-            <StackPanel Margin="30" Spacing="30" VerticalAlignment="Center">
+            <!-- Card -->
+            <Border Background="White"
+                    CornerRadius="16"
+                    BoxShadow="0 4 15 0 #1A000000">
+
+                <StackPanel Margin="30" Spacing="30">
                 
                 <!-- Header Section -->
                 <StackPanel Spacing="8">
@@ -174,8 +178,8 @@
                             HorizontalAlignment="Stretch"
                             Height="50"/>
                 </StackPanel>
-            </StackPanel>
+                </StackPanel>
+            </Border>
         </Border>
-    </Border>
-    </Panel>
+    </ScrollViewer>
 </UserControl>
