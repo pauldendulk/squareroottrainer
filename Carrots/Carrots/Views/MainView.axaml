@@ -63,11 +63,12 @@
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto">
         <!-- Main Container - Centered with Max Width -->
-        <Border Padding="40" MaxWidth="665" HorizontalAlignment="Center">
+        <Border Padding="40" MaxWidth="665" HorizontalAlignment="Center" VerticalAlignment="Top">
             <!-- Card -->
             <Border Background="White"
                     CornerRadius="16"
-                    BoxShadow="0 4 15 0 #1A000000">
+                BoxShadow="0 4 15 0 #1A000000"
+                VerticalAlignment="Top">
 
                 <StackPanel Margin="30" Spacing="30">
                 
