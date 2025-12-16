@@ -19,7 +19,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
+        global-json-file: global.json
         
     - name: Restore dependencies
       run: dotnet restore SquareRootTrainer/SquareRootTrainer.csproj
@@ -48,7 +48,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
+        global-json-file: global.json
         
     - name: Restore dependencies
       run: dotnet restore Carrots/Carrots.Desktop/Carrots.Desktop.csproj
@@ -77,7 +77,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
+        global-json-file: global.json
         
     - name: Install wasm-tools workload
       run: dotnet workload install wasm-tools
