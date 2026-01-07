@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Square Root Trainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #F3F4F6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: #4F46E5;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background-color: #4338CA;
+        }
+        
+        .btn-primary:active:not(:disabled) {
+            background-color: #3730A3;
+        }
+        
+        input:disabled, select:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        label {
+            color: #374151;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-10">
+    <div class="card w-full max-w-md p-8">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <h1 id="title" class="text-3xl font-bold text-gray-900 mb-2">Square Root Trainer</h1>
+            <p id="subtitle" class="text-sm text-gray-500 max-w-md mx-auto">
+                Start the app and keep it running in the background while you answer the questions in your head when they come up.
+            </p>
+        </div>
+
+        <!-- Settings Form -->
+        <div class="space-y-5 mb-6">
+            <!-- Language Selection -->
+            <div class="grid grid-cols-[auto_1fr] gap-5 items-center">
+                <label id="languageLabel" for="languageSelect" class="text-sm">Language</label>
+                <select id="languageSelect" 
+                        class="rounded-md border-gray-300 border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="en-US">English (en-US)</option>
+                    <option value="nl-NL">Nederlands (nl-NL)</option>
+                </select>
+            </div>
+
+            <!-- Answer Time Input -->
+            <div class="grid grid-cols-[auto_1fr] gap-5 items-center">
+                <label id="answerTimeLabel" for="answerTime" class="text-sm">Time to answer (s)</label>
+                <input id="answerTime" 
+                       type="number" 
+                       min="1" 
+                       value="3"
+                       class="rounded-md border-gray-300 border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            </div>
+
+            <!-- Interval Input -->
+            <div class="grid grid-cols-[auto_1fr] gap-5 items-center">
+                <label id="intervalTimeLabel" for="intervalTime" class="text-sm">Interval time (s)</label>
+                <input id="intervalTime" 
+                       type="number" 
+                       min="1" 
+                       value="300"
+                       class="rounded-md border-gray-300 border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            </div>
+
+            <!-- Lowest Number Input -->
+            <div class="grid grid-cols-[auto_1fr] gap-5 items-center">
+                <label id="lowestNumberLabel" for="lowestNumber" class="text-sm">Lowest Number</label>
+                <input id="lowestNumber" 
+                       type="number" 
+                       min="1" 
+                       max="20" 
+                       value="4"
+                       class="rounded-md border-gray-300 border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            </div>
+
+            <!-- Highest Number Input -->
+            <div class="grid grid-cols-[auto_1fr] gap-5 items-center">
+                <label id="highestNumberLabel" for="highestNumber" class="text-sm">Highest Number</label>
+                <input id="highestNumber" 
+                       type="number" 
+                       min="1" 
+                       max="20" 
+                       value="20"
+                       class="rounded-md border-gray-300 border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            </div>
+        </div>
+
+        <!-- Countdown Indicator -->
+        <div class="text-center mb-6 min-h-[30px]">
+            <p id="countdownText" class="text-lg font-semibold" style="color: #6366F1;"></p>
+        </div>
+
+        <!-- Action Button -->
+        <button id="startStopButton" 
+                class="btn-primary w-full text-white font-semibold py-3 rounded-lg cursor-pointer">
+            Start Training
+        </button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

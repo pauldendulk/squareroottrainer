@@ -1,0 +1,10 @@
+/* Additional custom styles (most styling is done with Tailwind CSS in index.html) */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
