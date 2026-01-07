@@ -4,7 +4,7 @@ A web application that helps you memorize square roots of numbers 1-20 through a
 
 **Try it now:** https://pauldendulk.github.io/squareroottrainer
 
-![Square Root Trainer Application](docs/screenshot.png)
+<img width="491" height="600" alt="image" src="https://github.com/user-attachments/assets/0379fa85-5c60-4558-bda7-df9964e7b221" />
 
 ### Background
 
