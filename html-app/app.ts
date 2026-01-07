@@ -157,6 +157,7 @@ class TrainingSession {
 
         // Start the training loop
         this.trainingLoopAsync(config, this.abortController.signal).catch((err) => {
+            // Silently ignore AbortError (expected when stopping)
             if (err.name !== 'AbortError') {
                 console.error('Training loop error:', err);
             }
@@ -246,7 +247,9 @@ class TrainingSession {
 
             const onAbort = () => {
                 clearTimeout(timeout);
-                reject(new Error('AbortError'));
+                const error = new Error('Operation aborted');
+                error.name = 'AbortError';
+                reject(error);
             };
 
             signal.addEventListener('abort', onAbort, { once: true });
