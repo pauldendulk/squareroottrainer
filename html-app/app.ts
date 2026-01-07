@@ -90,7 +90,7 @@ class AudioPlayer {
                 resolve();
             };
 
-            const onError = (e: ErrorEvent) => {
+            const onError = (e: Event) => {
                 cleanup();
                 console.error(`Audio playback error: ${audioPath}`, e);
                 reject(new Error(`Failed to play audio: ${audioPath}`));
