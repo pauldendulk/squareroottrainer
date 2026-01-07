@@ -24,33 +24,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: global.json
-
-      - name: Install wasm-tools
-        run: dotnet workload install wasm-tools
-
-      - name: Publish
-        run: dotnet publish Carrots/Carrots.Browser/Carrots.Browser.csproj -c Release -o publish
-
-      # GitHub Pages serves files as-is and does not set Content-Encoding headers for
-      # pre-compressed assets (*.br/*.gz). The dotnet WASM bootstrap may attempt to
-      # load these and fail at runtime. Publish still includes the uncompressed assets,
-      # so we remove the pre-compressed variants for reliable Pages hosting.
-      - name: Remove pre-compressed assets
+      - name: Prepare deployment directory
         run: |
-          find publish/wwwroot -type f -name '*.br' -delete
-          find publish/wwwroot -type f -name '*.gz' -delete
-
+          mkdir -p deploy
+          cp -r html-app/* deploy/
+          
       - name: Disable Jekyll
-        run: touch publish/wwwroot/.nojekyll
+        run: touch deploy/.nojekyll
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: publish/wwwroot
+          path: deploy
 
       - id: deployment
         uses: actions/deploy-pages@v4
